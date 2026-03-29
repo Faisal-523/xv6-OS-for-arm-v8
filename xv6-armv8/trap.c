@@ -11,6 +11,12 @@ void swi_handler (struct trapframe *r, uint32 el, uint32 esr)
     //cprintf("\tswi_handler: %d\n", r->r0);
     proc->tf = r;
     syscall ();
+
+    // If a user process was marked for death during a syscall,
+    // terminate it before returning to user mode.
+    if (el == 0 && proc != 0 && proc->killed) {
+        exit();
+    }
 }
 
 // trap routine
@@ -23,32 +29,44 @@ void irq_handler (struct trapframe *r, uint32 el, uint32 esr)
     }
 
     pic_dispatch (r);
+
+    // Match xv6 behavior: don't return to user mode if process is killed.
+    if (el == 0 && proc != 0 && proc->killed) {
+        exit();
+    }
 }
 
 // trap routine
 void dabort_handler (struct trapframe *r, uint32 el, uint32 esr)
 {
     uint64 fa;
-    extern void show_callstk (char *s);
-    cli();
-
-    // read the fault address register
     asm("MRS %[r], FAR_EL1": [r]"=r" (fa)::);
-    
-    cprintf ("data abort: instruction 0x%x, fault addr 0x%x\n",
-             r->pc, fa);
-  
+
+    if (el == 0 && proc != 0) {
+        // User process touched invalid memory; terminate just that process.
+        proc->killed = 1;
+        exit();
+    }
+
+    cli();
+    cprintf ("data abort: instruction 0x%x, fault addr 0x%x\n", r->pc, fa);
     dump_trapframe (r);
-    //show_callstk("Stack dump for data exception.");
+    panic("kernel data abort");
 }
 
 // trap routine
 void iabort_handler (struct trapframe *r, uint32 el, uint32 esr)
 {
+    if (el == 0 && proc != 0) {
+        proc->killed = 1;
+        exit();
+    }
+
     cli();
     cprintf ("prefetch abort at: 0x%x\n", r->pc);
 
     dump_trapframe (r);
+    panic("kernel instruction abort");
 }
 
 // trap routine

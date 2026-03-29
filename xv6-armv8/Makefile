@@ -1,5 +1,5 @@
-# specify path to QEMU, installed with MacPorts 
-QEMU = qemu-system-arm
+# QEMU command for ARMv8/AArch64 kernel
+QEMU = qemu-system-aarch64
 
 include makefile.inc
 
@@ -51,7 +51,7 @@ kernel.elf: $(addprefix build/,$(KERN_OBJS)) kernel.ld build/initcode build/fs.i
 qemu: kernel.elf
 	@clear
 	@echo "Press Ctrl-A and then X to terminate QEMU session\n"
-	$(QEMU) -M versatilepb -m 128 -cpu arm1176  -nographic -kernel kernel.elf
+	$(QEMU) -M virt -m 128 -cpu cortex-a57 -nographic -kernel kernel.elf
 
 INITCODE_OBJ = initcode.o
 $(addprefix build/,$(INITCODE_OBJ)): initcode.S

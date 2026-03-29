@@ -2,112 +2,112 @@
 .global trapret
 
 .macro	exception_1_entry
-	sub sp, sp, #0x20        /* reserverd for LR, SP, SPSR and ELR */
-	stp	x28, x29, [sp, #-16]!
-	stp	x26, x27, [sp, #-16]!
-	stp	x24, x25, [sp, #-16]!
-	stp	x22, x23, [sp, #-16]!
-	stp	x20, x21, [sp, #-16]!
-	stp	x18, x19, [sp, #-16]!
-	stp	x16, x17, [sp, #-16]!
-	stp	x14, x15, [sp, #-16]!
-	stp	x12, x13, [sp, #-16]!
-	stp	x10, x11, [sp, #-16]!
-	stp	x8, x9, [sp, #-16]!
-	stp	x6, x7, [sp, #-16]!
-	stp	x4, x5, [sp, #-16]!
-	stp	x2, x3, [sp, #-16]!
-	stp	x0, x1, [sp, #-16]!
-	add x21, sp, #0x110
+	sub	sp, sp, #272
+	add	x21, sp, #272            /* interrupted SP (SP_EL1) */
+	mrs	x22, elr_el1             /* interrupted PC */
+	mrs	x23, spsr_el1
 
-	mrs	x22, elr_el3             /* ELR */
-	mrs	x23, spsr_el3            /* SPSR */
+	str	x21, [sp, #0]            /* trapframe.sp */
+	str	x22, [sp, #8]            /* trapframe.pc */
+	str	x23, [sp, #16]           /* trapframe.spsr */
 
-	stp	x30, x21, [sp, #0xf0]    /* LR, SP */
-	stp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
+	stp	x0, x1, [sp, #24]
+	stp	x2, x3, [sp, #40]
+	stp	x4, x5, [sp, #56]
+	stp	x6, x7, [sp, #72]
+	stp	x8, x9, [sp, #88]
+	stp	x10, x11, [sp, #104]
+	stp	x12, x13, [sp, #120]
+	stp	x14, x15, [sp, #136]
+	stp	x16, x17, [sp, #152]
+	stp	x18, x19, [sp, #168]
+	stp	x20, x21, [sp, #184]
+	stp	x22, x23, [sp, #200]
+	stp	x24, x25, [sp, #216]
+	stp	x26, x27, [sp, #232]
+	stp	x28, x29, [sp, #248]
+	str	x30, [sp, #264]
 .endm
 
 .macro	exception_1_exit
-	ldp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
-	ldp	x30, x28, [sp, #0xf0]    /* LR, SP */
+	ldr	x22, [sp, #8]
+	ldr	x23, [sp, #16]
+	msr	elr_el1, x22
+	msr	spsr_el1, x23
 
-	msr	elr_el3, x22             /* ELR */
-	msr	spsr_el3, x23
-	
-	mov x29, sp
-	mov sp, x28
-
-	ldp	x0, x1, [x29], #16
-	ldp	x2, x3, [x29], #16
-	ldp	x4, x5, [x29], #16
-	ldp	x6, x7, [x29], #16
-	ldp	x8, x9, [x29], #16
-	ldp	x10, x11, [x29], #16
-	ldp	x12, x13, [x29], #16
-	ldp	x14, x15, [x29], #16
-	ldp	x16, x17, [x29], #16
-	ldp	x18, x19, [x29], #16
-	ldp	x20, x21, [x29], #16
-	ldp	x22, x23, [x29], #16
-	ldp	x24, x25, [x29], #16
-	ldp	x26, x27, [x29], #16
-	ldr x28, [x29], #8
-	ldr x29, [x29]
+	ldp	x0, x1, [sp, #24]
+	ldp	x2, x3, [sp, #40]
+	ldp	x4, x5, [sp, #56]
+	ldp	x6, x7, [sp, #72]
+	ldp	x8, x9, [sp, #88]
+	ldp	x10, x11, [sp, #104]
+	ldp	x12, x13, [sp, #120]
+	ldp	x14, x15, [sp, #136]
+	ldp	x16, x17, [sp, #152]
+	ldp	x18, x19, [sp, #168]
+	ldp	x20, x21, [sp, #184]
+	ldp	x22, x23, [sp, #200]
+	ldp	x24, x25, [sp, #216]
+	ldp	x26, x27, [sp, #232]
+	ldp	x28, x29, [sp, #248]
+	ldr	x30, [sp, #264]
+	add	sp, sp, #272
 	eret
 .endm
 
 .macro	exception_0_entry
-	sub sp, sp, #0x20        /* reserverd for LR, SP, SPSR and ELR */
-	stp	x28, x29, [sp, #-16]!
-	stp	x26, x27, [sp, #-16]!
-	stp	x24, x25, [sp, #-16]!
-	stp	x22, x23, [sp, #-16]!
-	stp	x20, x21, [sp, #-16]!
-	stp	x18, x19, [sp, #-16]!
-	stp	x16, x17, [sp, #-16]!
-	stp	x14, x15, [sp, #-16]!
-	stp	x12, x13, [sp, #-16]!
-	stp	x10, x11, [sp, #-16]!
-	stp	x8, x9, [sp, #-16]!
-	stp	x6, x7, [sp, #-16]!
-	stp	x4, x5, [sp, #-16]!
-	stp	x2, x3, [sp, #-16]!
-	stp	x0, x1, [sp, #-16]!
+	sub	sp, sp, #272
+	mrs	x21, sp_el0
+	mrs	x22, elr_el1
+	mrs	x23, spsr_el1
 
-	mrs x21, sp_el0
-	mrs	x22, elr_el3             /* ELR */
-	mrs	x23, spsr_el3            /* SPSR */
+	str	x21, [sp, #0]            /* trapframe.sp (user SP) */
+	str	x22, [sp, #8]            /* trapframe.pc (user PC) */
+	str	x23, [sp, #16]           /* trapframe.spsr */
 
-	stp	x30, x21, [sp, #0xf0]    /* LR, SP */
-	stp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
+	stp	x0, x1, [sp, #24]
+	stp	x2, x3, [sp, #40]
+	stp	x4, x5, [sp, #56]
+	stp	x6, x7, [sp, #72]
+	stp	x8, x9, [sp, #88]
+	stp	x10, x11, [sp, #104]
+	stp	x12, x13, [sp, #120]
+	stp	x14, x15, [sp, #136]
+	stp	x16, x17, [sp, #152]
+	stp	x18, x19, [sp, #168]
+	stp	x20, x21, [sp, #184]
+	stp	x22, x23, [sp, #200]
+	stp	x24, x25, [sp, #216]
+	stp	x26, x27, [sp, #232]
+	stp	x28, x29, [sp, #248]
+	str	x30, [sp, #264]
 .endm
 
 .macro	exception_0_exit
-	ldp	x22, x23, [sp, #0x100]   /* ELR, SPSR */
-	ldp	x30, x28, [sp, #0xf0]    /* LR, SP */
+	ldr	x21, [sp, #0]
+	ldr	x22, [sp, #8]
+	ldr	x23, [sp, #16]
+	msr	sp_el0, x21
+	msr	elr_el1, x22
+	msr	spsr_el1, x23
 
-	msr	elr_el3, x22             /* ELR */
-	msr	spsr_el3, x23
-	msr sp_el0, x28
-
-	mov x29, sp
-
-	ldp	x0, x1, [x29], #16
-	ldp	x2, x3, [x29], #16
-	ldp	x4, x5, [x29], #16
-	ldp	x6, x7, [x29], #16
-	ldp	x8, x9, [x29], #16
-	ldp	x10, x11, [x29], #16
-	ldp	x12, x13, [x29], #16
-	ldp	x14, x15, [x29], #16
-	ldp	x16, x17, [x29], #16
-	ldp	x18, x19, [x29], #16
-	ldp	x20, x21, [x29], #16
-	ldp	x22, x23, [x29], #16
-	ldp	x24, x25, [x29], #16
-	ldp	x26, x27, [x29], #16
-	ldr x28, [x29], #8
-	ldr x29, [x29]
+	ldp	x0, x1, [sp, #24]
+	ldp	x2, x3, [sp, #40]
+	ldp	x4, x5, [sp, #56]
+	ldp	x6, x7, [sp, #72]
+	ldp	x8, x9, [sp, #88]
+	ldp	x10, x11, [sp, #104]
+	ldp	x12, x13, [sp, #120]
+	ldp	x14, x15, [sp, #136]
+	ldp	x16, x17, [sp, #152]
+	ldp	x18, x19, [sp, #168]
+	ldp	x20, x21, [sp, #184]
+	ldp	x22, x23, [sp, #200]
+	ldp	x24, x25, [sp, #216]
+	ldp	x26, x27, [sp, #232]
+	ldp	x28, x29, [sp, #248]
+	ldr	x30, [sp, #264]
+	add	sp, sp, #272
 	eret
 .endm
 
@@ -314,4 +314,3 @@ _el_lower_error:
 	mrs	x2, esr_el1
 	bl	error_handler
 	b	.
-

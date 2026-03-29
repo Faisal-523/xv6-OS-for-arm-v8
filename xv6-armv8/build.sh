@@ -2,8 +2,7 @@
 
 # add the ARM cross toolchain to your path
 # for aarch64
-export PATH=/home/lakshman/Acads/695_osdi/aarch64-toolchain/gcc-linaro-4.9-2014.11-x86_64_aarch64-elf/bin:$PATH
-#export PATH=/home/lakshman/Acads/695_osdi/aarch64-toolchain/gcc-linaro-4.9-2014.11-x86_64_aarch64-linux-gnu/bin:$PATH
+export PATH=/home/faisal/Documents/OSTEP/arm-gnu-toolchain-15.2.rel1-x86_64-aarch64-none-elf/bin:$PATH
 
 # Build Kernel
 clear
